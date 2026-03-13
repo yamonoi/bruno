@@ -63,24 +63,30 @@ function getBreadcrumbSegments(
   return findCategoryPath(categories, categoryId);
 }
 
-/** Returns the next sibling category (for the "Continuation Patterns / Next" footer) */
+/** Returns the next navigation target:
+ *  - subcategory → next sibling sub; if last sub → next top-level category
+ *  - top-level → next top-level
+ */
 function findNextSibling(
   categories: DocumentCategoryHierarchical[],
   categoryId: number,
 ): DocumentCategoryHierarchical | null {
-  for (const cat of categories) {
-    // Check among children
-    const idx = cat.children.findIndex((c) => c.id === categoryId);
-    if (idx !== -1 && idx + 1 < cat.children.length) {
-      return cat.children[idx + 1];
-    }
-    const found = findNextSibling(cat.children, categoryId);
-    if (found) return found;
-  }
-  // Check top-level siblings
+  // Is it a top-level category?
   const topIdx = categories.findIndex((c) => c.id === categoryId);
-  if (topIdx !== -1 && topIdx + 1 < categories.length) {
-    return categories[topIdx + 1];
+  if (topIdx !== -1) {
+    return topIdx + 1 < categories.length ? categories[topIdx + 1] : null;
+  }
+  // Is it a subcategory?
+  for (const cat of categories) {
+    const idx = cat.children.findIndex((c) => c.id === categoryId);
+    if (idx !== -1) {
+      if (idx + 1 < cat.children.length) return cat.children[idx + 1];
+      // Last sub → go to next top-level parent
+      const parentIdx = categories.findIndex((c) => c.id === cat.id);
+      return parentIdx + 1 < categories.length
+        ? categories[parentIdx + 1]
+        : null;
+    }
   }
   return null;
 }
@@ -212,7 +218,14 @@ export default function DashboardPage() {
   // -----------------------------------------------------------------------
 
   const handleSelectCategory = (id: number | null) => {
-    setSelectedCategoryId(id);
+    let resolvedId = id;
+    if (id !== null) {
+      const cat = findCategory(categories, id);
+      if (cat && cat.children.length > 0) {
+        resolvedId = cat.children[0].id;
+      }
+    }
+    setSelectedCategoryId(resolvedId);
     setCurrentPage(1);
     setSelectedDocument(null);
   };

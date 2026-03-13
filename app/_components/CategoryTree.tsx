@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { DocumentCategoryHierarchical } from "@/lib/api/types";
 
 interface CategoryTreeProps {
@@ -59,6 +59,20 @@ export default function CategoryTree({
   docCountMap,
 }: CategoryTreeProps) {
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+
+  // Auto-expand parent when a subcategory is selected
+  useEffect(() => {
+    if (selectedCategoryId === null) return;
+    for (const cat of categories) {
+      if (cat.children.some((c) => c.id === selectedCategoryId)) {
+        setExpandedIds((prev) => {
+          if (prev.has(cat.id)) return prev;
+          return new Set([...prev, cat.id]);
+        });
+        break;
+      }
+    }
+  }, [selectedCategoryId, categories]);
 
   const toggle = (id: number) =>
     setExpandedIds((prev) => {

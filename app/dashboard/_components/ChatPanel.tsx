@@ -75,12 +75,12 @@ function UserAvatar() {
         width: 36,
         height: 36,
         borderRadius: 10,
-        background: "#1e293b",
+        background: "#ffffff",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         flexShrink: 0,
-        color: "#ffffff",
+        color: "#475467",
         fontSize: 12,
         fontWeight: 600,
         letterSpacing: "0.02em",
@@ -139,11 +139,11 @@ function renderInline(text: string): React.ReactNode {
 export default function ChatPanel({ onClose }: ChatPanelProps) {
   return (
     <div
-      className="shrink-0 border-l border-[#e5e7eb] flex flex-col"
+      className="shrink-0 flex flex-col"
       style={{
-        width: 360,
-        minHeight: "100vh",
+        width: 340,
         background: "#f9fafb",
+        borderLeft: "1px solid #e5e7eb",
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
@@ -286,7 +286,16 @@ export default function ChatPanel({ onClose }: ChatPanelProps) {
               color: "#6b7280",
             }}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <rect x="2" y="3" width="20" height="14" rx="2" />
               <path d="M8 21h8M12 17v4" />
             </svg>
@@ -303,7 +312,16 @@ export default function ChatPanel({ onClose }: ChatPanelProps) {
               color: "#6b7280",
             }}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
             </svg>
             Attach

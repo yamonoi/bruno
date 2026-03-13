@@ -16,3 +16,12 @@ body {
   color: var(--text-main);
   font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
 }
+
+/* Hide scrollbars visually while keeping scroll functionality */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

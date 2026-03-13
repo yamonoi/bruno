@@ -45,12 +45,13 @@ export default function CategoryTree({
 
   return (
     <div
-      className="shrink-0 border-r border-[#e5e7eb] overflow-y-auto"
+      className="shrink-0 overflow-y-auto no-scrollbar"
       style={{
-        width: 280,
-        minHeight: "100vh",
+        width: 240,
         background: "#ffffff",
         fontFamily: "'Inter', system-ui, sans-serif",
+        borderRadius: 12,
+        scrollbarWidth: "none",
       }}
     >
       {/* Header */}

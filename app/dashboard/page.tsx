@@ -72,21 +72,50 @@ function getBreadcrumbSegments(
   return findCategoryPath(categories, categoryId);
 }
 
+/** Returns the next sibling category (for the "Continuation Patterns / Next" footer) */
+function findNextSibling(
+  categories: DocumentCategoryHierarchical[],
+  categoryId: number,
+): DocumentCategoryHierarchical | null {
+  for (const cat of categories) {
+    // Check among children
+    const idx = cat.children.findIndex((c) => c.id === categoryId);
+    if (idx !== -1 && idx + 1 < cat.children.length) {
+      return cat.children[idx + 1];
+    }
+    const found = findNextSibling(cat.children, categoryId);
+    if (found) return found;
+  }
+  // Check top-level siblings
+  const topIdx = categories.findIndex((c) => c.id === categoryId);
+  if (topIdx !== -1 && topIdx + 1 < categories.length) {
+    return categories[topIdx + 1];
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 
 export default function DashboardPage() {
-  const [categories, setCategories] = useState<DocumentCategoryHierarchical[]>([]);
-  const [documents, setDocuments] = useState<PagedResponse<DocumentRead> | null>(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [categories, setCategories] = useState<DocumentCategoryHierarchical[]>(
+    [],
+  );
+  const [documents, setDocuments] =
+    useState<PagedResponse<DocumentRead> | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
+    null,
+  );
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(true);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<DocumentReadDetail | null>(null);
-  const [linkedDocsDocument, setLinkedDocsDocument] = useState<DocumentRead | null>(null);
+  const [selectedDocument, setSelectedDocument] =
+    useState<DocumentReadDetail | null>(null);
+  const [linkedDocsDocument, setLinkedDocsDocument] =
+    useState<DocumentRead | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [docCountMap, setDocCountMap] = useState<Record<number, number>>({});
@@ -124,9 +153,10 @@ export default function DashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const cat = selectedCategoryId !== null
-        ? findCategory(categories, selectedCategoryId)
-        : null;
+      const cat =
+        selectedCategoryId !== null
+          ? findCategory(categories, selectedCategoryId)
+          : null;
 
       const isParent = cat ? cat.children.length > 0 : false;
 
@@ -203,7 +233,11 @@ export default function DashboardPage() {
     file: File;
   }) => {
     for (const category_id of params.category_ids) {
-      await api.documents.upload({ name: params.name, category_id, file: params.file });
+      await api.documents.upload({
+        name: params.name,
+        category_id,
+        file: params.file,
+      });
     }
     setUploadOpen(false);
     await fetchDocuments();
@@ -225,9 +259,12 @@ export default function DashboardPage() {
   // -----------------------------------------------------------------------
 
   const breadcrumb = getBreadcrumbSegments(categories, selectedCategoryId);
-  const pageTitle = getCategoryName(categories, selectedCategoryId);
   const totalDocuments = documents?.total ?? 0;
   const totalPages = documents?.pages ?? 1;
+  const nextCategory =
+    selectedCategoryId !== null
+      ? findNextSibling(categories, selectedCategoryId)
+      : null;
 
   // -----------------------------------------------------------------------
   // Render
@@ -235,228 +272,292 @@ export default function DashboardPage() {
 
   return (
     <div
-      className="flex min-h-screen"
+      className="flex h-screen overflow-hidden"
       style={{
         fontFamily: "'Inter', system-ui, sans-serif",
-        background: "#f9fafb",
+        background: "#eef0f3",
       }}
     >
-      {/* Narrow sidebar */}
-      <Sidebar chatOpen={chatOpen} onToggleChat={() => setChatOpen((v) => !v)} />
-
-      {/* Category tree panel */}
-      <CategoryTree
-        categories={categories}
-        selectedCategoryId={selectedCategoryId}
-        onSelectCategory={handleSelectCategory}
-        onAddCategory={() => setAddCategoryOpen(true)}
-        allDocsTotal={allDocsTotal}
-        docCountMap={docCountMap}
+      {/* Narrow sidebar — flush */}
+      <Sidebar
+        chatOpen={chatOpen}
+        onToggleChat={() => setChatOpen((v) => !v)}
       />
 
-      {/* Main content */}
-      {selectedDocument ? (
-        <DocumentView
-          document={selectedDocument}
-          categoryPath={findCategoryPath(categories, selectedDocument.category_id)}
-          onBack={() => setSelectedDocument(null)}
+      {/* Middle area: padding creates the floating-card look */}
+      <div className="flex-1 flex gap-[24px] p-[24px] overflow-hidden min-h-0">
+        {/* Category tree — scrollable card */}
+        <CategoryTree
+          categories={categories}
+          selectedCategoryId={selectedCategoryId}
+          onSelectCategory={handleSelectCategory}
+          onAddCategory={() => setAddCategoryOpen(true)}
+          allDocsTotal={allDocsTotal}
+          docCountMap={docCountMap}
         />
-      ) : (
-        <div className="flex-1 overflow-y-auto" style={{ background: "#f9fafb" }}>
-          {/* Header area */}
+
+        {/* Main content */}
+        {selectedDocument ? (
           <div
-            className="px-6 py-4 border-b border-[#e5e7eb]"
+            className="flex-1 overflow-y-auto rounded-xl no-scrollbar"
             style={{ background: "#ffffff" }}
           >
-            {/* Breadcrumb */}
-            <div className="flex items-center gap-1 text-xs mb-2" style={{ color: "#6b7280" }}>
-              {breadcrumb.map((seg, i) => (
-                <span key={i} className="flex items-center gap-1">
-                  {i > 0 && (
-                    <svg
-                      width="10"
-                      height="10"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#9ca3af"
-                      strokeWidth="2.5"
-                    >
-                      <polyline points="9 18 15 12 9 6" />
-                    </svg>
-                  )}
-                  <span
-                    style={{
-                      color: i === breadcrumb.length - 1 ? "#111827" : "#6b7280",
-                      fontWeight: i === breadcrumb.length - 1 ? 500 : 400,
-                    }}
-                  >
-                    {seg}
-                  </span>
-                </span>
-              ))}
-            </div>
+            <DocumentView
+              document={selectedDocument}
+              categoryPath={findCategoryPath(
+                categories,
+                selectedDocument.category_id,
+              )}
+              onBack={() => setSelectedDocument(null)}
+            />
+          </div>
+        ) : (
+          <div
+            className="flex-1 overflow-y-auto rounded-xl no-scrollbar"
+            style={{ background: "#ffffff" }}
+          >
+            {/* Header area */}
+            <div className="px-6 pt-5 pb-4">
+              {/* Breadcrumb */}
+              <div
+                className="flex items-center gap-1.5 text-sm mb-4"
+                style={{ color: "#6b7280" }}
+              >
+                {breadcrumb.map((seg, i) => {
+                  const isLast = i === breadcrumb.length - 1;
+                  return (
+                    <span key={i} className="flex items-center gap-1.5">
+                      {i > 0 && (
+                        <svg
+                          width="10"
+                          height="10"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#9ca3af"
+                          strokeWidth="2.5"
+                        >
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                      )}
+                      <span
+                        style={{
+                          color: isLast ? "#111827" : "#6b7280",
+                          fontWeight: isLast ? 600 : 400,
+                          background: isLast ? "#f3f4f6" : "transparent",
+                          padding: isLast ? "2px 8px" : "0",
+                          borderRadius: isLast ? 6 : 0,
+                        }}
+                      >
+                        {seg}
+                      </span>
+                    </span>
+                  );
+                })}
+              </div>
 
-            {/* Title row */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <h1
-                  className="text-lg font-semibold"
-                  style={{ color: "#111827" }}
-                >
-                  {pageTitle}
-                </h1>
+              {/* Title */}
+              <h1
+                className="text-2xl font-bold mb-4"
+                style={{ color: "#111827" }}
+              >
+                Strategy Files
+              </h1>
+
+              {/* Status filter + Add Document */}
+              <div className="flex items-center justify-between">
                 <StatusFilter
                   value={statusFilter}
                   onChange={handleStatusChange}
                   totalCount={totalDocuments}
                 />
-              </div>
-              <button
-                onClick={() => setUploadOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:opacity-90"
-                style={{
-                  background: "#2563eb",
-                  color: "#ffffff",
-                  border: "none",
-                  cursor: "pointer",
-                }}
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                <button
+                  onClick={() => setUploadOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:opacity-90"
+                  style={{
+                    background: "#2563eb",
+                    color: "#ffffff",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
                 >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                Add Document
-              </button>
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  Add Document
+                </button>
+              </div>
+            </div>
+
+            {/* Document list */}
+            <div className="p-6">
+              {loading && !documents && (
+                <div className="flex items-center justify-center py-16">
+                  <div className="text-sm" style={{ color: "#6b7280" }}>
+                    Loading documents...
+                  </div>
+                </div>
+              )}
+
+              {error && (
+                <div
+                  className="border rounded-lg p-4 mb-4 text-sm"
+                  style={{
+                    background: "#fef2f2",
+                    borderColor: "#fecaca",
+                    color: "#dc2626",
+                  }}
+                >
+                  {error}
+                </div>
+              )}
+
+              {documents && documents.items.length === 0 && (
+                <div className="text-center py-16">
+                  <svg
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#d1d5db"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mx-auto mb-3"
+                  >
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: "#6b7280" }}
+                  >
+                    No documents found
+                  </p>
+                  <p className="text-xs mt-1" style={{ color: "#9ca3af" }}>
+                    Upload a document to get started
+                  </p>
+                </div>
+              )}
+
+              {documents &&
+                documents.items.map((doc) => (
+                  <DocumentCard
+                    key={doc.id}
+                    document={doc}
+                    categoryPath={findCategoryPath(categories, doc.category_id)}
+                    onView={handleViewDocument}
+                    onLinkedDocs={(d) => setLinkedDocsDocument(d)}
+                  />
+                ))}
+
+              {/* Next category navigation */}
+              {nextCategory && (
+                <div className="flex items-center justify-end gap-3 mt-6 pt-4">
+                  <span className="text-sm" style={{ color: "#6b7280" }}>
+                    {nextCategory.name}
+                  </span>
+                  <button
+                    onClick={() => handleSelectCategory(nextCategory.id)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-[#f3f4f6]"
+                    style={{
+                      background: "#ffffff",
+                      color: "#111827",
+                      border: "1px solid #e5e7eb",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Next
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+
+              {/* Pagination */}
+              {documents && totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#e5e7eb]">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage <= 1}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-colors"
+                    style={{
+                      background: "#ffffff",
+                      color: currentPage <= 1 ? "#d1d5db" : "#374151",
+                      border: "1px solid #e5e7eb",
+                      cursor: currentPage <= 1 ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                    Previous
+                  </button>
+                  <span className="text-sm" style={{ color: "#6b7280" }}>
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
+                    disabled={currentPage >= totalPages}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-colors"
+                    style={{
+                      background: "#ffffff",
+                      color: currentPage >= totalPages ? "#d1d5db" : "#374151",
+                      border: "1px solid #e5e7eb",
+                      cursor:
+                        currentPage >= totalPages ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    Next
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
+        )}
+      </div>
+      {/* end middle wrapper */}
 
-          {/* Document list */}
-          <div className="p-6">
-            {loading && !documents && (
-              <div className="flex items-center justify-center py-16">
-                <div className="text-sm" style={{ color: "#6b7280" }}>
-                  Loading documents...
-                </div>
-              </div>
-            )}
-
-            {error && (
-              <div
-                className="border rounded-lg p-4 mb-4 text-sm"
-                style={{
-                  background: "#fef2f2",
-                  borderColor: "#fecaca",
-                  color: "#dc2626",
-                }}
-              >
-                {error}
-              </div>
-            )}
-
-            {documents && documents.items.length === 0 && (
-              <div className="text-center py-16">
-                <svg
-                  width="48"
-                  height="48"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#d1d5db"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="mx-auto mb-3"
-                >
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
-                <p className="text-sm font-medium" style={{ color: "#6b7280" }}>
-                  No documents found
-                </p>
-                <p className="text-xs mt-1" style={{ color: "#9ca3af" }}>
-                  Upload a document to get started
-                </p>
-              </div>
-            )}
-
-            {documents &&
-              documents.items.map((doc) => (
-                <DocumentCard
-                  key={doc.id}
-                  document={doc}
-                  categoryPath={findCategoryPath(categories, doc.category_id)}
-                  onView={handleViewDocument}
-                  onLinkedDocs={(d) => setLinkedDocsDocument(d)}
-                />
-              ))}
-
-            {/* Pagination */}
-            {documents && totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#e5e7eb]">
-                <button
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage <= 1}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-colors"
-                  style={{
-                    background: "#ffffff",
-                    color: currentPage <= 1 ? "#d1d5db" : "#374151",
-                    border: "1px solid #e5e7eb",
-                    cursor: currentPage <= 1 ? "not-allowed" : "pointer",
-                  }}
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <polyline points="15 18 9 12 15 6" />
-                  </svg>
-                  Previous
-                </button>
-                <span className="text-sm" style={{ color: "#6b7280" }}>
-                  Page {currentPage} of {totalPages}
-                </span>
-                <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage >= totalPages}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-colors"
-                  style={{
-                    background: "#ffffff",
-                    color: currentPage >= totalPages ? "#d1d5db" : "#374151",
-                    border: "1px solid #e5e7eb",
-                    cursor: currentPage >= totalPages ? "not-allowed" : "pointer",
-                  }}
-                >
-                  Next
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Chat panel (toggleable) */}
+      {/* Chat panel — flush right */}
       {chatOpen && <ChatPanel onClose={() => setChatOpen(false)} />}
 
       {/* Modals */}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import UploadSvg from "@/icons/upload.svg";
 import type { DocumentCategoryHierarchical } from "@/lib/api/types";
 
 interface UploadModalProps {
@@ -16,44 +17,34 @@ interface UploadModalProps {
 // ─── Multi-select dropdown ────────────────────────────────────────────────────
 
 interface MultiSelectProps {
-  label: string;
-  required?: boolean;
   options: { id: number; name: string }[];
   selected: number[];
   onChange: (ids: number[]) => void;
   placeholder?: string;
-  disabled?: boolean;
 }
 
 function MultiSelect({
-  label,
-  required,
   options,
   selected,
   onChange,
   placeholder = "Select...",
-  disabled = false,
 }: MultiSelectProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handle(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      if (ref.current && !ref.current.contains(e.target as Node))
         setOpen(false);
-      }
     }
     document.addEventListener("mousedown", handle);
     return () => document.removeEventListener("mousedown", handle);
   }, []);
 
-  const toggle = (id: number) => {
-    if (selected.includes(id)) {
-      onChange(selected.filter((s) => s !== id));
-    } else {
-      onChange([...selected, id]);
-    }
-  };
+  const toggle = (id: number) =>
+    onChange(
+      selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id]
+    );
 
   const displayText =
     selected.length === 0
@@ -63,122 +54,113 @@ function MultiSelect({
       : `${selected.length} selected`;
 
   return (
-    <div>
-      <label
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
         style={{
-          display: "block",
-          fontSize: 13,
-          fontWeight: 500,
-          color: "#374151",
-          marginBottom: 4,
+          width: "100%",
+          padding: "11px 14px",
+          borderRadius: 8,
+          border: `1px solid ${open ? "#2563eb" : "#e5e7eb"}`,
+          fontSize: 14,
+          color: selected.length > 0 ? "#111827" : "#9ca3af",
+          background: "#ffffff",
           fontFamily: "'Inter', system-ui, sans-serif",
+          outline: "none",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          boxSizing: "border-box",
         }}
       >
-        {label} {required && <span style={{ color: "#ef4444" }}>*</span>}
-      </label>
-      <div ref={ref} style={{ position: "relative" }}>
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => !disabled && setOpen((v) => !v)}
+        <span>{displayText}</span>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#6b7280"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
           style={{
-            width: "100%",
-            padding: "8px 12px",
-            borderRadius: 8,
-            border: `1px solid ${open ? "#2563eb" : "#e5e7eb"}`,
-            fontSize: 14,
-            color: selected.length > 0 ? "#111827" : "#9ca3af",
-            background: disabled ? "#f9fafb" : "#ffffff",
-            fontFamily: "'Inter', system-ui, sans-serif",
-            outline: "none",
-            cursor: disabled ? "not-allowed" : "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            opacity: disabled ? 0.6 : 1,
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.15s",
+            flexShrink: 0,
           }}
         >
-          <span>{displayText}</span>
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#6b7280"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.15s" }}
-          >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </button>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
 
-        {open && options.length > 0 && (
-          <div
-            style={{
-              position: "absolute",
-              top: "calc(100% + 4px)",
-              left: 0,
-              right: 0,
-              background: "#ffffff",
-              border: "1px solid #e5e7eb",
-              borderRadius: 8,
-              boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
-              zIndex: 100,
-              maxHeight: 220,
-              overflowY: "auto",
-            }}
-          >
-            {options.map((opt) => {
-              const checked = selected.includes(opt.id);
-              return (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => toggle(opt.id)}
-                  style={{
-                    width: "100%",
-                    padding: "10px 14px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: 14,
-                    color: "#111827",
-                    fontFamily: "'Inter', system-ui, sans-serif",
-                    textAlign: "left",
-                  }}
-                  onMouseEnter={(e) =>
-                    ((e.currentTarget as HTMLButtonElement).style.background = "#f9fafb")
-                  }
-                  onMouseLeave={(e) =>
-                    ((e.currentTarget as HTMLButtonElement).style.background = "transparent")
-                  }
-                >
-                  <span>{opt.name}</span>
-                  {checked && (
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#2563eb"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      {open && options.length > 0 && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 4px)",
+            left: 0,
+            right: 0,
+            background: "#ffffff",
+            border: "1px solid #e5e7eb",
+            borderRadius: 8,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
+            zIndex: 100,
+            maxHeight: 200,
+            overflowY: "auto",
+          }}
+        >
+          {options.map((opt) => {
+            const checked = selected.includes(opt.id);
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => toggle(opt.id)}
+                style={{
+                  width: "100%",
+                  padding: "10px 14px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: checked ? "#eff6ff" : "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 14,
+                  color: "#111827",
+                  fontFamily: "'Inter', system-ui, sans-serif",
+                  textAlign: "left",
+                }}
+                onMouseEnter={(e) => {
+                  if (!checked)
+                    (e.currentTarget as HTMLButtonElement).style.background = "#f9fafb";
+                }}
+                onMouseLeave={(e) => {
+                  if (!checked)
+                    (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+                }}
+              >
+                <span>{opt.name}</span>
+                {checked && (
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#2563eb"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -201,35 +183,36 @@ export default function UploadModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const parentCategories = categories.filter((c) => c.parent_id == null);
+  // Show all subcategories; if parents selected — filter to their children
+  const allSubCategories = parentCategories.flatMap((c) => c.children);
+  const subCategories =
+    selectedParentIds.length > 0
+      ? parentCategories
+          .filter((c) => selectedParentIds.includes(c.id))
+          .flatMap((c) => c.children)
+      : allSubCategories;
 
-  // Union of children from all selected parents
-  const availableSubCategories = parentCategories
-    .filter((c) => selectedParentIds.includes(c.id))
-    .flatMap((c) => c.children);
-
-  // Reset sub-selections when parents change
   const handleParentChange = (ids: number[]) => {
     setSelectedParentIds(ids);
-    // Remove sub-ids that no longer belong to selected parents
-    const validSubIds = parentCategories
-      .filter((c) => ids.includes(c.id))
-      .flatMap((c) => c.children.map((ch) => ch.id));
-    setSelectedSubIds((prev) => prev.filter((id) => validSubIds.includes(id)));
+    // drop subs that no longer belong to selected parents
+    if (ids.length > 0) {
+      const validIds = new Set(
+        parentCategories
+          .filter((c) => ids.includes(c.id))
+          .flatMap((c) => c.children.map((ch) => ch.id))
+      );
+      setSelectedSubIds((prev) => prev.filter((id) => validIds.has(id)));
+    }
   };
 
-  const canSubmit =
-    name.trim() && selectedSubIds.length > 0 && file && !loading;
+  const canSubmit = name.trim() && selectedSubIds.length > 0 && file && !loading;
 
   const handleSubmit = async () => {
     if (!canSubmit || !file) return;
     setLoading(true);
     setError(null);
     try {
-      await onUpload({
-        name: name.trim(),
-        category_ids: selectedSubIds,
-        file,
-      });
+      await onUpload({ name: name.trim(), category_ids: selectedSubIds, file });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
       setLoading(false);
@@ -239,8 +222,7 @@ export default function UploadModal({
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
-    else if (e.type === "dragleave") setDragActive(false);
+    setDragActive(e.type === "dragenter" || e.type === "dragover");
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -250,24 +232,12 @@ export default function UploadModal({
     if (e.dataTransfer.files?.[0]) setFile(e.dataTransfer.files[0]);
   };
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "8px 12px",
-    borderRadius: 8,
-    border: "1px solid #e5e7eb",
-    fontSize: 14,
-    color: "#111827",
-    background: "#ffffff",
-    fontFamily: "'Inter', system-ui, sans-serif",
-    outline: "none",
-  };
-
   const labelStyle: React.CSSProperties = {
     display: "block",
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: 500,
-    color: "#374151",
-    marginBottom: 4,
+    color: "#111827",
+    marginBottom: 6,
     fontFamily: "'Inter', system-ui, sans-serif",
   };
 
@@ -280,163 +250,349 @@ export default function UploadModal({
       }}
     >
       <div
-        className="rounded-xl shadow-xl w-full max-w-lg"
         style={{
           background: "#ffffff",
+          borderRadius: 16,
+          width: "100%",
+          maxWidth: 520,
           fontFamily: "'Inter', system-ui, sans-serif",
-          maxHeight: "90vh",
-          overflowY: "auto",
+          position: "relative",
         }}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e5e7eb]">
-          <h2 className="text-base font-semibold" style={{ color: "#111827" }}>
-            Upload Document
-          </h2>
-          <button
-            onClick={onClose}
-            style={{ background: "none", border: "none", cursor: "pointer", color: "#6b7280", padding: 4 }}
+        {/* Close button — absolute top-right */}
+        <button
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: "#9ca3af",
+            padding: 4,
+            lineHeight: 1,
+          }}
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+
+        {/* Decorative upload icon top-left */}
+        <div style={{ padding: "24px 24px 0" }}>
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: "50%",
+              border: "1.5px solid #E9EAEB",
+              background: "#FAFAFA",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 12,
+            }}
+          >
+            <UploadSvg width={22} height={22} stroke="#374151" />
+          </div>
+
+          <h2
+            style={{
+              fontSize: 17,
+              fontWeight: 700,
+              color: "#111827",
+              margin: "0 0 20px",
+            }}
+          >
+            Upload New Document
+          </h2>
         </div>
 
         {/* Body */}
-        <div className="px-6 py-4 flex flex-col gap-4">
+        <div
+          style={{
+            padding: "0 24px 24px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+          }}
+        >
           {/* Document Name */}
           <div>
             <label style={labelStyle}>
-              Document Name <span style={{ color: "#ef4444" }}>*</span>
+              Document Name <span style={{ color: "#6366f1" }}>*</span>
             </label>
             <input
               type="text"
-              placeholder="Enter document name"
+              placeholder="i.e Support and Resistance Levels"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              style={inputStyle}
+              style={{
+                width: "100%",
+                padding: "11px 14px",
+                borderRadius: 8,
+                border: "1px solid #e5e7eb",
+                fontSize: 14,
+                color: "#111827",
+                background: "#ffffff",
+                fontFamily: "'Inter', system-ui, sans-serif",
+                outline: "none",
+                boxSizing: "border-box",
+              }}
             />
           </div>
 
-          {/* Two-column category row */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          {/* Technical Category */}
+          <div>
+            <label style={labelStyle}>
+              Technical Category <span style={{ color: "#6366f1" }}>*</span>
+            </label>
             <MultiSelect
-              label="Technical Category"
-              required
               options={parentCategories}
               selected={selectedParentIds}
               onChange={handleParentChange}
-              placeholder="Select category..."
+              placeholder="Select a technical topic..."
             />
+          </div>
+
+          {/* Method Category */}
+          <div>
+            <label style={labelStyle}>
+              Method Category <span style={{ color: "#6366f1" }}>*</span>
+            </label>
             <MultiSelect
-              label="Method Category"
-              required
-              options={availableSubCategories}
+              options={subCategories}
               selected={selectedSubIds}
               onChange={setSelectedSubIds}
               placeholder="Select strategic area..."
-              disabled={selectedParentIds.length === 0}
             />
+            {selectedParentIds.length > 0 && subCategories.length === 0 && (
+              <p style={{ fontSize: 12, color: "#d97706", margin: "6px 0 0" }}>
+                Selected category has no subcategories. Please choose a different technical category.
+              </p>
+            )}
           </div>
 
           {/* File upload */}
-          <div>
-            <label style={labelStyle}>File</label>
-            <div
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed cursor-pointer transition-colors"
-              style={{
-                borderColor: dragActive ? "#2563eb" : "#e5e7eb",
-                background: dragActive ? "#eff6ff" : "#f9fafb",
-                padding: "24px 16px",
+          <div
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              border: `1px solid ${dragActive ? "#2563eb" : "#e5e7eb"}`,
+              borderRadius: 8,
+              background: dragActive ? "#eff6ff" : "#ffffff",
+              padding: "20px 16px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              cursor: "pointer",
+              transition: "border-color 0.15s, background 0.15s",
+            }}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                if (e.target.files?.[0]) setFile(e.target.files[0]);
               }}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                className="hidden"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) setFile(e.target.files[0]);
-                }}
-              />
-              {file ? (
-                <div className="text-center">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-2">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                    <polyline points="22 4 12 14.01 9 11.01" />
+            />
+            {file ? (
+              <>
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: "50%",
+                    border: "1.5px solid #16a34a",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 12,
+                  }}
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#16a34a"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
                   </svg>
-                  <p className="text-sm font-medium" style={{ color: "#111827" }}>{file.name}</p>
-                  <p className="text-xs mt-1" style={{ color: "#6b7280" }}>{(file.size / 1024).toFixed(1)} KB</p>
                 </div>
-              ) : (
-                <>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="17 8 12 3 7 8" />
-                    <line x1="12" y1="3" x2="12" y2="15" />
-                  </svg>
-                  <p className="text-sm" style={{ color: "#6b7280" }}>
-                    <span style={{ color: "#2563eb", fontWeight: 500 }}>Click to upload</span> or drag and drop
-                  </p>
-                </>
-              )}
-            </div>
+                <p
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: "#111827",
+                    margin: "0 0 4px",
+                  }}
+                >
+                  {file.name}
+                </p>
+                <p style={{ fontSize: 12, color: "#6b7280", margin: 0 }}>
+                  {(file.size / 1024).toFixed(1)} KB
+                </p>
+              </>
+            ) : (
+              <>
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: "50%",
+                    border: "1.5px solid #E9EAEB",
+                    background: "#FAFAFA",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 10,
+                  }}
+                >
+                  <UploadSvg width={20} height={20} stroke="#475467" />
+                </div>
+                <p
+                  style={{ fontSize: 14, color: "#374151", margin: "0 0 4px" }}
+                >
+                  <span style={{ color: "#6366f1", fontWeight: 600 }}>
+                    Click to upload
+                  </span>{" "}
+                  or drag and drop
+                </p>
+                <p style={{ fontSize: 12, color: "#9ca3af", margin: 0 }}>
+                  SVG, PNG, JPG or GIF (max. 800×400px)
+                </p>
+              </>
+            )}
           </div>
 
-          {/* Notes */}
+          {/* Notes for Bruno */}
           <div>
-            <label style={labelStyle}>Notes for Bruno</label>
+            <h3
+              style={{
+                fontSize: 15,
+                fontWeight: 700,
+                color: "#111827",
+                margin: "0 0 8px",
+              }}
+            >
+              Notes for Bruno
+            </h3>
             <textarea
-              placeholder="Optional notes..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              style={{ ...inputStyle, resize: "vertical" }}
+              rows={4}
+              placeholder={
+                "Examples:\n• This replaces an older version on the same topic\n• Don't create rules from this yet\n• Focus on the entry signals section"
+              }
+              style={{
+                width: "100%",
+                padding: "11px 14px",
+                borderRadius: 8,
+                border: "1px solid #e5e7eb",
+                fontSize: 14,
+                color: "#111827",
+                background: "#ffffff",
+                fontFamily: "'Inter', system-ui, sans-serif",
+                outline: "none",
+                resize: "vertical",
+                boxSizing: "border-box",
+                lineHeight: 1.6,
+              }}
             />
           </div>
 
           {error && (
-            <p className="text-sm" style={{ color: "#ef4444" }}>{error}</p>
+            <p style={{ fontSize: 14, color: "#ef4444", margin: 0 }}>{error}</p>
           )}
-        </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#e5e7eb]">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg text-sm font-medium"
-            style={{ background: "#ffffff", color: "#374151", border: "1px solid #e5e7eb", cursor: "pointer" }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={!canSubmit}
-            className="px-4 py-2 rounded-lg text-sm font-medium"
+          {/* Footer buttons */}
+          <div
             style={{
-              background: canSubmit ? "#2563eb" : "#93c5fd",
-              color: "#ffffff",
-              border: "none",
-              cursor: canSubmit ? "pointer" : "not-allowed",
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 12,
+              paddingTop: 4,
             }}
           >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <circle cx="12" cy="12" r="10" strokeDasharray="31.4 31.4" strokeLinecap="round" />
-                </svg>
-                Uploading...
-              </span>
-            ) : (
-              "Upload Document"
-            )}
-          </button>
+            <button
+              onClick={onClose}
+              style={{
+                padding: "10px 24px",
+                borderRadius: 8,
+                border: "1px solid #e5e7eb",
+                background: "#ffffff",
+                color: "#111827",
+                fontSize: 14,
+                fontWeight: 500,
+                cursor: "pointer",
+                fontFamily: "'Inter', system-ui, sans-serif",
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={!canSubmit}
+              style={{
+                padding: "10px 24px",
+                borderRadius: 8,
+                border: "none",
+                background: canSubmit ? "#2563eb" : "#93c5fd",
+                color: "#ffffff",
+                fontSize: 14,
+                fontWeight: 500,
+                cursor: canSubmit ? "pointer" : "not-allowed",
+                fontFamily: "'Inter', system-ui, sans-serif",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              {loading ? (
+                <>
+                  <svg
+                    className="animate-spin"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      strokeDasharray="31.4 31.4"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  Uploading...
+                </>
+              ) : (
+                "Upload Document"
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

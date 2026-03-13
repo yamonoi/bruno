@@ -1,6 +1,10 @@
 "use client";
 
 import type { DocumentRead } from "@/lib/api/types";
+import HomeSvg from "@/icons/home.svg";
+import EyeSvg from "@/icons/eye.svg";
+import RobotSvg from "@/icons/robot.svg";
+import LinkSvg from "@/icons/link.svg";
 
 interface DocumentCardProps {
   document: DocumentRead;
@@ -104,37 +108,26 @@ export default function DocumentCard({
     >
       {/* Breadcrumb */}
       <div
-        className="flex items-center gap-1 text-xs mb-2"
-        style={{ color: "#6b7280" }}
+        className="flex items-center gap-2 mb-3"
+        style={{ color: "#374151" }}
       >
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#6b7280"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-          <polyline points="9 22 9 12 15 12 15 22" />
-        </svg>
+        {/* Home icon */}
+        <HomeSvg width={20} height={20} />
         {categoryPath.map((seg, i) => (
-          <span key={i} className="flex items-center gap-1">
-            {i > 0 && (
-              <svg
-                width="10"
-                height="10"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#9ca3af"
-                strokeWidth="2.5"
-              >
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            )}
-            <span>{seg}</span>
+          <span key={i} className="flex items-center gap-2">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#9ca3af"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+            <span style={{ fontSize: 13, fontWeight: 400 }}>{seg}</span>
           </span>
         ))}
       </div>
@@ -151,7 +144,7 @@ export default function DocumentCard({
 
       {/* Actions row */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           {/* View */}
           <button
             onClick={() => onView(document.id)}
@@ -165,19 +158,7 @@ export default function DocumentCard({
               cursor: "pointer",
             }}
           >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#6b7280"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
+            <EyeSvg width={20} height={20} />
           </button>
 
           {/* Bruno AI (robot) */}
@@ -193,27 +174,7 @@ export default function DocumentCard({
             }}
             onClick={() => setChatOpen(true)}
           >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#6b7280"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              {/* antenna */}
-              <line x1="12" y1="2" x2="12" y2="5" />
-              <circle cx="12" cy="1.5" r="1" fill="#6b7280" stroke="none" />
-              {/* head */}
-              <rect x="3" y="5" width="18" height="14" rx="3" />
-              {/* eyes */}
-              <circle cx="9" cy="11" r="1.5" fill="#6b7280" stroke="none" />
-              <circle cx="15" cy="11" r="1.5" fill="#6b7280" stroke="none" />
-              {/* mouth */}
-              <path d="M9 15 h6" strokeWidth="1.8" />
-            </svg>
+            <RobotSvg width={20} height={20} />
           </button>
 
           {/* Linked docs */}
@@ -229,19 +190,7 @@ export default function DocumentCard({
               cursor: "pointer",
             }}
           >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#6b7280"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-            </svg>
+            <LinkSvg width={20} height={20} />
           </button>
         </div>
 

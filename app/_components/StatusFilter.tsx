@@ -8,6 +8,7 @@ interface StatusFilterProps {
   value: StatusFilterValue;
   onChange: (status: StatusFilterValue) => void;
   totalCount: number;
+  statusCounts: { active: number; in_process: number; new: number };
 }
 
 const OPTIONS: {
@@ -15,49 +16,90 @@ const OPTIONS: {
   value: StatusFilterValue;
   dotColor: string;
 }[] = [
-  { label: "All Statuses", value: null, dotColor: "#374151" },
+  { label: "All Statuses", value: null, dotColor: "#6b7280" },
   { label: "Learned", value: "active", dotColor: "#16a34a" },
   { label: "In Process", value: "in_process", dotColor: "#d97706" },
   { label: "New", value: "new", dotColor: "#dc2626" },
 ];
 
+function Badge({ count }: { count: number }) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minWidth: 26,
+        height: 26,
+        borderRadius: 13,
+        border: "1.5px solid #E9EAEB",
+        fontSize: 12,
+        fontWeight: 500,
+        color: "#374151",
+        background: "#FAFAFA",
+        flexShrink: 0,
+        padding: "0 5px",
+        lineHeight: 1,
+      }}
+    >
+      {count}
+    </span>
+  );
+}
+
 export default function StatusFilter({
   value,
   onChange,
   totalCount,
+  statusCounts,
 }: StatusFilterProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      if (ref.current && !ref.current.contains(e.target as Node))
         setOpen(false);
-      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const counts: Record<string, number> = {
+    all: totalCount,
+    active: statusCounts.active,
+    in_process: statusCounts.in_process,
+    new: statusCounts.new,
+  };
+
+  const getCount = (v: StatusFilterValue) =>
+    v === null ? counts.all : (counts[v] ?? 0);
+
   const currentOption = OPTIONS.find((o) => o.value === value) ?? OPTIONS[0];
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} style={{ position: "relative" }}>
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm transition-colors"
         style={{
-          borderColor: "#e5e7eb",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "8px 14px",
+          borderRadius: 12,
+          border: "1px solid #e5e7eb",
           background: "#ffffff",
           color: "#374151",
           cursor: "pointer",
           fontFamily: "'Inter', system-ui, sans-serif",
+          fontSize: 14,
+          fontWeight: 500,
         }}
       >
         <span
           style={{
-            width: 7,
-            height: 7,
+            width: 8,
+            height: 8,
             borderRadius: "50%",
             background: currentOption.dotColor,
             display: "inline-block",
@@ -65,21 +107,20 @@ export default function StatusFilter({
           }}
         />
         {currentOption.label}
-        <span
-          className="text-xs px-1.5 py-0.5 rounded-full"
-          style={{ background: "#f3f4f6", color: "#6b7280" }}
-        >
-          {totalCount}
-        </span>
+        <Badge count={getCount(value)} />
         <svg
-          width="12"
-          height="12"
+          width="14"
+          height="14"
           viewBox="0 0 24 24"
           fill="none"
           stroke="#6b7280"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
+          style={{
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.15s",
+          }}
         >
           <polyline points="6 9 12 15 18 9" />
         </svg>
@@ -87,8 +128,18 @@ export default function StatusFilter({
 
       {open && (
         <div
-          className="absolute top-full left-0 mt-1 py-1 rounded-lg border border-[#e5e7eb] shadow-lg z-50"
-          style={{ background: "#ffffff", minWidth: 200 }}
+          style={{
+            position: "absolute",
+            top: "calc(100% + 6px)",
+            left: 0,
+            background: "#ffffff",
+            border: "1px solid #e5e7eb",
+            borderRadius: 12,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+            zIndex: 50,
+            minWidth: 220,
+            padding: "6px 0",
+          }}
         >
           {OPTIONS.map((opt) => (
             <button
@@ -97,14 +148,28 @@ export default function StatusFilter({
                 onChange(opt.value);
                 setOpen(false);
               }}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-[#f9fafb]"
               style={{
-                color: "#111827",
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "10px 16px",
                 background: "transparent",
                 border: "none",
                 cursor: "pointer",
                 fontFamily: "'Inter', system-ui, sans-serif",
+                fontSize: 14,
+                color: "#111827",
+                fontWeight: 500,
               }}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background =
+                  "#f9fafb")
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background =
+                  "transparent")
+              }
             >
               <span
                 style={{
@@ -116,7 +181,9 @@ export default function StatusFilter({
                   flexShrink: 0,
                 }}
               />
-              <span className="flex-1 text-left">{opt.label}</span>
+              <span style={{ textAlign: "left" }}>{opt.label}</span>
+              <Badge count={getCount(opt.value)} />
+              <span style={{ flex: 1 }} />
               {value === opt.value && (
                 <svg
                   width="14"

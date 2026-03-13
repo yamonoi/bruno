@@ -1,5 +1,8 @@
 "use client";
 
+import RobotSvg from "@/icons/robot.svg";
+import TypingSvg from "@/icons/typing.svg";
+
 interface ChatPanelProps {
   onClose: () => void;
 }
@@ -33,41 +36,6 @@ const MOCK_MESSAGES: Message[] = [
   { role: "typing" },
 ];
 
-function BotIcon() {
-  return (
-    <div
-      style={{
-        width: 36,
-        height: 36,
-        borderRadius: 10,
-        background: "#e5e7eb",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexShrink: 0,
-      }}
-    >
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="#374151"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <line x1="12" y1="2" x2="12" y2="5" />
-        <circle cx="12" cy="1.5" r="1" fill="#374151" stroke="none" />
-        <rect x="3" y="5" width="18" height="14" rx="3" />
-        <circle cx="9" cy="11" r="1.5" fill="#374151" stroke="none" />
-        <circle cx="15" cy="11" r="1.5" fill="#374151" stroke="none" />
-        <path d="M9 15 h6" />
-      </svg>
-    </div>
-  );
-}
-
 function UserAvatar() {
   return (
     <div
@@ -87,34 +55,6 @@ function UserAvatar() {
       }}
     >
       UK
-    </div>
-  );
-}
-
-function TypingIndicator() {
-  return (
-    <div
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 4,
-        background: "#ffffff",
-        borderRadius: 10,
-        padding: "8px 14px",
-      }}
-    >
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            background: "#9ca3af",
-            display: "inline-block",
-          }}
-        />
-      ))}
     </div>
   );
 }
@@ -171,7 +111,7 @@ export default function ChatPanel({ onClose }: ChatPanelProps) {
           if (msg.role === "typing") {
             return (
               <div key={i}>
-                <TypingIndicator />
+                <TypingSvg width={40} height={40} />
               </div>
             );
           }
@@ -179,7 +119,7 @@ export default function ChatPanel({ onClose }: ChatPanelProps) {
           if (msg.role === "bot") {
             return (
               <div key={i} className="flex items-start gap-3">
-                <BotIcon />
+                <RobotSvg width={20} height={20} />
                 <div className="flex flex-col gap-2">
                   {msg.bubbles.map((bubble, j) => (
                     <div

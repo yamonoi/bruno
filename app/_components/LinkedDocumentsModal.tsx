@@ -1,6 +1,7 @@
 "use client";
 
 import type { DocumentRead } from "@/lib/api/types";
+import LinkSvg from "@/icons/link.svg";
 
 interface LinkedDoc {
   id: number;
@@ -11,9 +12,24 @@ interface LinkedDoc {
 
 // Static mockup data — no real API for linked documents
 const MOCK_LINKED: LinkedDoc[] = [
-  { id: 1, title: "Double Top Confirmation Signals", type: "Confirmation Tool", category: "Pattern Analysis" },
-  { id: 2, title: "Risk Management for Reversal Patterns", type: "Trade Management", category: "Risk Management" },
-  { id: 3, title: "Multi-Timeframe Pattern Analysis", type: "Pattern Strategy", category: "Market Structure" },
+  {
+    id: 1,
+    title: "Double Top Confirmation Signals",
+    type: "Confirmation Tool",
+    category: "Pattern Analysis",
+  },
+  {
+    id: 2,
+    title: "Risk Management for Reversal Patterns",
+    type: "Trade Management",
+    category: "Risk Management",
+  },
+  {
+    id: 3,
+    title: "Multi-Timeframe Pattern Analysis",
+    type: "Pattern Strategy",
+    category: "Market Structure",
+  },
 ];
 
 interface LinkedDocumentsModalProps {
@@ -55,7 +71,16 @@ export default function LinkedDocumentsModal({
             padding: 4,
           }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
@@ -66,14 +91,14 @@ export default function LinkedDocumentsModal({
           className="flex items-center justify-center rounded-xl mb-4"
           style={{ width: 48, height: 48, background: "#f3f4f6" }}
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-          </svg>
+          <LinkSvg width={24} height={24} />
         </div>
 
         {/* Title */}
-        <h2 className="text-base font-semibold mb-4" style={{ color: "#111827" }}>
+        <h2
+          className="text-base font-semibold mb-4"
+          style={{ color: "#111827" }}
+        >
           Linked Documents ({MOCK_LINKED.length})
         </h2>
 

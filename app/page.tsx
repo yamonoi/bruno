@@ -111,6 +111,7 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [docCountMap, setDocCountMap] = useState<Record<number, number>>({});
   const [allDocsTotal, setAllDocsTotal] = useState(0);
+  const [statusCounts, setStatusCounts] = useState<{ active: number; in_process: number; new: number }>({ active: 0, in_process: 0, new: 0 });
 
   // -----------------------------------------------------------------------
   // Data fetching
@@ -118,14 +119,29 @@ export default function DashboardPage() {
 
   const fetchDocCountMap = useCallback(async () => {
     try {
-      // Fetch enough docs to build per-category counts
-      const data = await api.documents.list({ size: 500 });
-      setAllDocsTotal(data.total);
       const map: Record<number, number> = {};
-      for (const doc of data.items) {
-        map[doc.category_id] = (map[doc.category_id] ?? 0) + 1;
+      let page = 1;
+      const size = 100;
+      let total = Infinity;
+      const sc = { active: 0, in_process: 0, new: 0 };
+
+      while ((page - 1) * size < total) {
+        const data = await api.documents.list({ page, size });
+        if (page === 1) {
+          total = data.total;
+          setAllDocsTotal(data.total);
+        }
+        for (const doc of data.items) {
+          map[doc.category_id] = (map[doc.category_id] ?? 0) + 1;
+          if (doc.status === "active") sc.active++;
+          else { sc.in_process++; sc.new++; }
+        }
+        if (data.items.length < size) break;
+        page++;
       }
+
       setDocCountMap(map);
+      setStatusCounts(sc);
     } catch {
       // non-critical, ignore
     }
@@ -356,7 +372,8 @@ export default function DashboardPage() {
                 <StatusFilter
                   value={statusFilter}
                   onChange={handleStatusChange}
-                  totalCount={totalDocuments}
+                  totalCount={allDocsTotal}
+                  statusCounts={statusCounts}
                 />
                 <button
                   onClick={() => setUploadOpen(true)}

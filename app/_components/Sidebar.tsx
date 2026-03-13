@@ -1,16 +1,24 @@
 "use client";
 
+import Image from "next/image";
+import HomeSvg from "@/icons/home.svg";
+import BarChartSvg from "@/icons/bar.svg";
+import LayersSvg from "@/icons/layers.svg";
+import CheckDoneSvg from "@/icons/check-done.svg";
+import PieSvg from "@/icons/pie.svg";
+import SettingsSvg from "@/icons/settings.svg";
+
 export default function Sidebar() {
   const navItems = [
     { label: "Home", icon: HomeSvg, active: false },
     { label: "Analytics", icon: BarChartSvg, active: false },
     { label: "Documents", icon: LayersSvg, active: false },
     {
-      label: "Chat",
-      icon: MessageSquareSvg,
+      label: "CheckDone",
+      icon: CheckDoneSvg,
       active: false,
     },
-    { label: "History", icon: ClockSvg, active: false },
+    { label: "Pie", icon: PieSvg, active: false },
   ];
 
   return (
@@ -27,25 +35,14 @@ export default function Sidebar() {
       <div className="mb-8 mt-2">
         <div
           className="flex items-center justify-center rounded-xl"
-          style={{ width: 36, height: 36, background: "#2563eb" }}
+          style={{ width: 36, height: 36 }}
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-          </svg>
+          <Image src="/icons/logo.svg" width={36} height={36} alt="Bruno" />
         </div>
       </div>
 
       {/* Nav icons */}
-      <nav className="flex flex-col items-center gap-1 flex-1">
+      <nav className="flex flex-col items-center gap-4 flex-1">
         {navItems.map((item) => (
           <button
             key={item.label}
@@ -59,7 +56,12 @@ export default function Sidebar() {
               border: "none",
             }}
           >
-            <item.icon active={item.active} />
+            <item.icon
+              width={24}
+              height={24}
+              style={{ color: item.active ? "#2563eb" : "#6b7280" }}
+              stroke={item.active ? "#2563eb" : "#6b7280"}
+            />
           </button>
         ))}
       </nav>
@@ -72,24 +74,12 @@ export default function Sidebar() {
           style={{
             width: 40,
             height: 40,
-            background: "transparent",
+            background: "#F2F4F7",
             cursor: "pointer",
             border: "none",
           }}
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#6b7280"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
+          <SettingsSvg width={24} height={24} />
         </button>
         <div
           className="flex items-center justify-center rounded-full text-xs font-semibold"
@@ -104,101 +94,5 @@ export default function Sidebar() {
         </div>
       </div>
     </div>
-  );
-}
-
-function HomeSvg({ active }: { active: boolean }) {
-  const color = active ? "#2563eb" : "#6b7280";
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <polyline points="9 22 9 12 15 12 15 22" />
-    </svg>
-  );
-}
-
-function BarChartSvg({ active }: { active: boolean }) {
-  const color = active ? "#2563eb" : "#6b7280";
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1="12" y1="20" x2="12" y2="10" />
-      <line x1="18" y1="20" x2="18" y2="4" />
-      <line x1="6" y1="20" x2="6" y2="16" />
-    </svg>
-  );
-}
-
-function LayersSvg({ active }: { active: boolean }) {
-  const color = active ? "#2563eb" : "#6b7280";
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polygon points="12 2 2 7 12 12 22 7 12 2" />
-      <polyline points="2 17 12 22 22 17" />
-      <polyline points="2 12 12 17 22 12" />
-    </svg>
-  );
-}
-
-function MessageSquareSvg({ active }: { active: boolean }) {
-  const color = active ? "#2563eb" : "#6b7280";
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
-  );
-}
-
-function ClockSvg({ active }: { active: boolean }) {
-  const color = active ? "#2563eb" : "#6b7280";
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
   );
 }

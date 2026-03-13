@@ -5,7 +5,7 @@ import type { DocumentReadDetail } from "@/lib/api/types";
 interface DocumentViewProps {
   document: DocumentReadDetail;
   categoryPath: string[];
-  onBack: () => void;
+  setChatOpen: (open: boolean) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -46,7 +46,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
           }}
         >
           {inlineRender(content)}
-        </p>
+        </p>,
       );
       i++;
       continue;
@@ -70,11 +70,14 @@ function renderMarkdown(text: string): React.ReactNode[] {
           }}
         >
           {items.map((item, j) => (
-            <li key={j} style={{ color: "#374151", fontSize: 14, lineHeight: 1.7 }}>
+            <li
+              key={j}
+              style={{ color: "#374151", fontSize: 14, lineHeight: 1.7 }}
+            >
               {inlineRender(item)}
             </li>
           ))}
-        </ul>
+        </ul>,
       );
       continue;
     }
@@ -97,11 +100,14 @@ function renderMarkdown(text: string): React.ReactNode[] {
           }}
         >
           {items.map((item, j) => (
-            <li key={j} style={{ color: "#374151", fontSize: 14, lineHeight: 1.7 }}>
+            <li
+              key={j}
+              style={{ color: "#374151", fontSize: 14, lineHeight: 1.7 }}
+            >
               {inlineRender(item)}
             </li>
           ))}
-        </ol>
+        </ol>,
       );
       continue;
     }
@@ -119,7 +125,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
         }}
       >
         {inlineRender(line)}
-      </p>
+      </p>,
     );
     i++;
   }
@@ -148,7 +154,7 @@ function inlineRender(text: string): React.ReactNode {
 export default function DocumentView({
   document,
   categoryPath,
-  onBack,
+  setChatOpen,
 }: DocumentViewProps) {
   return (
     <div
@@ -164,11 +170,21 @@ export default function DocumentView({
         style={{ background: "#ffffff" }}
       >
         {/* Breadcrumb */}
-        <div className="flex items-center gap-1.5 text-sm" style={{ color: "#6b7280" }}>
+        <div
+          className="flex items-center gap-1.5 text-sm"
+          style={{ color: "#6b7280" }}
+        >
           {categoryPath.map((seg, i) => (
             <span key={i} className="flex items-center gap-1.5">
               {i > 0 && (
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2.5">
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#9ca3af"
+                  strokeWidth="2.5"
+                >
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               )}
@@ -176,10 +192,19 @@ export default function DocumentView({
             </span>
           ))}
           {/* Document name — last crumb, bold */}
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2.5">
+          <svg
+            width="10"
+            height="10"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#9ca3af"
+            strokeWidth="2.5"
+          >
             <polyline points="9 18 15 12 9 6" />
           </svg>
-          <span style={{ color: "#111827", fontWeight: 600 }}>{document.name}</span>
+          <span style={{ color: "#111827", fontWeight: 600 }}>
+            {document.name}
+          </span>
         </div>
 
         {/* Edit with Bruno — outlined button */}
@@ -191,9 +216,19 @@ export default function DocumentView({
             border: "1px solid #e5e7eb",
             cursor: "pointer",
           }}
+          onClick={() => setChatOpen(true)}
         >
           {/* Robot icon */}
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="12" y1="2" x2="12" y2="5" />
             <circle cx="12" cy="1.5" r="1" fill="currentColor" stroke="none" />
             <rect x="3" y="5" width="18" height="14" rx="3" />

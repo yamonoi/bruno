@@ -1,20 +1,14 @@
 "use client";
 
-interface SidebarProps {
-  chatOpen: boolean;
-  onToggleChat: () => void;
-}
-
-export default function Sidebar({ chatOpen, onToggleChat }: SidebarProps) {
+export default function Sidebar() {
   const navItems = [
     { label: "Home", icon: HomeSvg, active: false },
     { label: "Analytics", icon: BarChartSvg, active: false },
-    { label: "Documents", icon: LayersSvg, active: true },
+    { label: "Documents", icon: LayersSvg, active: false },
     {
       label: "Chat",
       icon: MessageSquareSvg,
-      active: chatOpen,
-      onClick: onToggleChat,
+      active: false,
     },
     { label: "History", icon: ClockSvg, active: false },
   ];
@@ -55,7 +49,6 @@ export default function Sidebar({ chatOpen, onToggleChat }: SidebarProps) {
         {navItems.map((item) => (
           <button
             key={item.label}
-            onClick={item.onClick}
             title={item.label}
             className="flex items-center justify-center rounded-xl transition-colors"
             style={{
